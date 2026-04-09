@@ -1,0 +1,62 @@
+---
+- name: Establish Portworx Disaster Recovery Pair
+  hosts: localhost
+  connection: local
+  become: true
+
+  vars:
+    primary_kubeconfig: ""
+    secondary_kubeconfig: ""
+    aws_access_key_id: ""
+    aws_secret_access_key: ""
+    s3_region: "us-east-2"
+    s3_endpoint: "s3.amazonaws.com"
+    dr_namespace: "boutique"
+    px_cred_name: "aws-dr-creds"
+
+  tasks:
+    - name: Ensure DR namespace exists on Primary
+      kubernetes.core.k8s:
+        kubeconfig: "{{ primary_kubeconfig }}"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ dr_namespace }}"
+
+    - name: Get Primary NLB Hostname
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ primary_kubeconfig }}"
+        kind: Service
+        name: portworx-api
+        namespace: portworx
+      register: primary_svc
+
+    - name: Get Secondary NLB Hostname
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ secondary_kubeconfig }}"
+        kind: Service
+        name: portworx-api
+        namespace: portworx
+      register: secondary_svc
+
+    - name: Set NLB Hostname Facts
+      set_fact:
+        primary_ext_ep: "{{ primary_svc.resources[0].status.loadBalancer.ingress[0].hostname }}"
+        secondary_ext_ep: "{{ secondary_svc.resources[0].status.loadBalancer.ingress[0].hostname }}"
+
+    - name: Generate ClusterPair
+      command: >
+        storkctl create clusterpair {{ dr_namespace }}-clusterpair
+          --namespace {{ dr_namespace }}
+          --src-kube-file {{ primary_kubeconfig }}
+          --dest-kube-file {{ secondary_kubeconfig }}
+          --provider s3
+          --s3-access-key {{ aws_access_key_id }}
+          --s3-secret-key {{ aws_secret_access_key }}
+          --s3-region {{ s3_region }}
+          --s3-endpoint {{ s3_endpoint }}
+          --src-ep {{ primary_ext_ep }}:9001
+          --dest-ep {{ secondary_ext_ep }}:9001
+      register: clusterpair_generation
