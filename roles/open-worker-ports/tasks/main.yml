@@ -1,20 +1,41 @@
 ---
-- name: Get worker nodes
-  register: worker_nodes
-  kubernetes.core.k8s_info:
-    kubeconfig: "{{ kubeconfig }}"
-    kind: Node
-    label_selectors:
-      - "node-role.kubernetes.io/worker"
+- name: Create temp directory for kubeconfig
+  ansible.builtin.tempfile:
+    state: directory
+    prefix: open_worker_ports_
+  register: _work_dir
 
-- name: Assert there are worker nodes
-  ansible.builtin.assert:
-    that:
-      - worker_nodes is defined
-      - worker_nodes | length > 0
-    fail_msg: There are no worker nodes present in the cluster with the given kubeconfig
+- name: Open worker ports
+  block:
+    - name: Write kubeconfig to temp file
+      ansible.builtin.copy:
+        content: "{{ kubeconfig }}"
+        dest: "{{ _work_dir.path }}/kubeconfig"
+        mode: "0600"
+      no_log: true
 
-- name: Apply ingress rules to all worker nodes
-  ansible.builtin.include_tasks: add-ingress-rules-for-node.yml
-  vars:
-    worker_node: "{{ worker_nodes[0] }}"
+    - name: Get worker nodes
+      register: worker_nodes
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ _work_dir.path }}/kubeconfig"
+        kind: Node
+        label_selectors:
+          - "node-role.kubernetes.io/worker"
+
+    - name: Assert there are worker nodes
+      ansible.builtin.assert:
+        that:
+          - worker_nodes is defined
+          - worker_nodes | length > 0
+        fail_msg: There are no worker nodes present in the cluster with the given kubeconfig
+
+    - name: Apply ingress rules to all worker nodes
+      ansible.builtin.include_tasks: add-ingress-rules-for-node.yml
+      vars:
+        worker_node: "{{ worker_nodes[0] }}"
+
+  always:
+    - name: Clean up temp directory
+      ansible.builtin.file:
+        path: "{{ _work_dir.path }}"
+        state: absent
