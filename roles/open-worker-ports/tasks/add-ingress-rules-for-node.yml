@@ -18,9 +18,9 @@
       - aws_security_groups is defined
       - aws_security_groups.security_groups is defined
       - aws_security_groups.security_groups | length == 1
-  fail_msg: >-
-    Expected exactly one security group with the tag 'tag:sigs.k8s.io/cluster-api-provider-aws/role: node' but
-    found {{ aws_security_groups.security_groups | length }}
+    fail_msg: >-
+      Expected exactly one security group with the tag 'tag:sigs.k8s.io/cluster-api-provider-aws/role: node' but
+      found {{ aws_security_groups.security_groups | length }}
 
 - name: Set facts for worker node security group
   ansible.builtin.set_fact:
