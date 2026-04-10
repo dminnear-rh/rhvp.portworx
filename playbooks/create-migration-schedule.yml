@@ -2,7 +2,6 @@
 - name: Establish Portworx Disaster Recovery Pair
   hosts: localhost
   connection: local
-  become: true
 
   vars:
     dr_namespace: "boutique"
