@@ -5,11 +5,9 @@
 
   vars:
     secondary_kubeconfig: ""
-    aws_access_key_id: ""
-    aws_secret_access_key: ""
 
   tasks:
-    - name: Run bubble test backup and restore
+    - name: Run bubble test clone
       ansible.builtin.include_role:
         name: bubble-test
       vars:
