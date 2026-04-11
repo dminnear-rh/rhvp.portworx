@@ -51,8 +51,7 @@
     name: "{{ region_cluster_name }}"
   register: _acm_managedcluster_status
   vars:
-    _acm_status_query: "resources[0].status.conditions[?type=='ManagedClusterJoined'].status"
-    _acm_update_status: "{{ _acm_managedcluster_status | json_query(_acm_status_query) | flatten | unique }}"  # noqa: jinja[invalid]
+    _acm_update_status: "{{ _acm_managedcluster_status.resources[0].status.conditions | selectattr('type', 'equalto', 'ManagedClusterJoined') | map(attribute='status') | list }}"
   until:
     - _acm_managedcluster_status.resources is defined
     - _acm_managedcluster_status.resources | length > 0
