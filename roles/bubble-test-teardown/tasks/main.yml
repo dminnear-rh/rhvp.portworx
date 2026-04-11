@@ -41,7 +41,7 @@
         pod: "{{ _stork_pod }}"
         command: >-
           {{ stork_binary_path }} delete applicationclone {{ bubble_clone_name }}
-          --namespace {{ clone_admin_namespace }}
+          --namespace {{ portworx_namespace }}
       failed_when: false
 
     - name: Delete bubble namespace

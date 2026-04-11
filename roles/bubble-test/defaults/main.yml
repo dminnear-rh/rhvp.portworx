@@ -2,7 +2,6 @@
 dr_namespace: "boutique"
 bubble_namespace: "boutique-bubble"
 bubble_clone_name: "boutique-bubble-clone"
-clone_admin_namespace: "kube-system"
 portworx_namespace: "portworx"
 stork_pod_label: "name=stork"
 stork_binary_path: "/storkctl/linux/storkctl"

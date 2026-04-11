@@ -54,7 +54,7 @@
           --sourceNamespace {{ dr_namespace }}
           --destinationNamespace {{ bubble_namespace }}
           --replacePolicy Delete
-          --namespace {{ clone_admin_namespace }}
+          --namespace {{ portworx_namespace }}
       register: _create_clone_result
       failed_when: false
 
@@ -71,7 +71,7 @@
         api_version: stork.libopenstorage.org/v1alpha1
         kind: ApplicationClone
         name: "{{ bubble_clone_name }}"
-        namespace: "{{ clone_admin_namespace }}"
+        namespace: "{{ portworx_namespace }}"
       register: _clone_status
       until:
         - _clone_status.resources | length > 0
