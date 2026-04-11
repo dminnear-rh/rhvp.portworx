@@ -96,7 +96,7 @@
         namespace: "{{ portworx_namespace }}"
         pod: "{{ _stork_pod }}"
         command: >-
-          {{ stork_binary_path }} create cluster-pair {{ cluster_pair_name }}
+          {{ stork_binary_path }} create clusterpair {{ cluster_pair_name }}
           --namespace {{ target_namespace }}
           --src-kube-file /tmp/primary-kubeconfig
           --dest-kube-file /tmp/secondary-kubeconfig
@@ -107,7 +107,7 @@
           --s3-endpoint {{ s3_endpoint }}
           --src-ep {{ _primary_ext_ep }}:9001
           --dest-ep {{ _secondary_ext_ep }}:9001
-      # no_log: true
+      no_log: true
 
   always:
     - name: Clean up kubeconfigs from Stork pod
