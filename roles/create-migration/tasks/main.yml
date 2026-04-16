@@ -5,7 +5,7 @@
     prefix: px_migration_
   register: _work_dir
 
-- name: Create migration schedule
+- name: Create migration
   block:
     - name: Write kubeconfig to temp file
       ansible.builtin.copy:
@@ -45,47 +45,27 @@
       ansible.builtin.set_fact:
         _cluster_pair_flag: >-
           {{ '--admin-cluster-pair ' + admin_cluster_pair if admin_cluster_pair | length > 0
-          else '--cluster-pair ' + cluster_pair }}
+          else '--clusterPair ' + cluster_pair }}
 
-    - name: Create SchedulePolicy
+    - name: Create Migration
       kubernetes.core.k8s_exec:
         kubeconfig: "{{ _work_dir.path }}/kubeconfig"
         namespace: "{{ portworx_namespace }}"
         pod: "{{ _stork_pod }}"
         command: >-
-          {{ stork_binary_path }} create schedulepolicy {{ schedule_policy_name }}
-          --namespace {{ dr_namespace }}
-          --interval-minutes {{ migration_interval | int }}
-      register: _create_sp_result
-      failed_when: false
-
-    - name: Verify schedule policy was created or already exists
-      ansible.builtin.fail:
-        msg: "Failed to create schedule policy: {{ _create_sp_result.stderr | default(_create_sp_result.stdout | default('unknown error')) }}"
-      when:
-        - _create_sp_result.return_code != 0
-        - "'already exists' not in (_create_sp_result.stderr | default('') + _create_sp_result.stdout | default(''))"
-
-    - name: Create MigrationSchedule
-      kubernetes.core.k8s_exec:
-        kubeconfig: "{{ _work_dir.path }}/kubeconfig"
-        namespace: "{{ portworx_namespace }}"
-        pod: "{{ _stork_pod }}"
-        command: >-
-          {{ stork_binary_path }} create migrationschedule {{ dr_namespace }}-migration-schedule
+          {{ stork_binary_path }} create migration {{ migration_name }}
           --namespace {{ dr_namespace }}
           {{ _cluster_pair_flag }}
           --namespaces {{ dr_namespace }}
-          --schedule-policy-name {{ schedule_policy_name }}
-      register: _create_ms_result
+      register: _create_migration_result
       failed_when: false
 
-    - name: Verify migration schedule was created or already exists
+    - name: Verify migration was created or already exists
       ansible.builtin.fail:
-        msg: "Failed to create migration schedule: {{ _create_ms_result.stderr | default(_create_ms_result.stdout | default('unknown error')) }}"
+        msg: "Failed to create migration: {{ _create_migration_result.stderr | default(_create_migration_result.stdout | default('unknown error')) }}"
       when:
-        - _create_ms_result.return_code != 0
-        - "'already exists' not in (_create_ms_result.stderr | default('') + _create_ms_result.stdout | default(''))"
+        - _create_migration_result.return_code != 0
+        - "'already exists' not in (_create_migration_result.stderr | default('') + _create_migration_result.stdout | default(''))"
 
   always:
     - name: Clean up temp directory

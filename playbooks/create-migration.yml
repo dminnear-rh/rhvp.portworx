@@ -1,5 +1,5 @@
 ---
-- name: Create Migration Schedule
+- name: Create Migration
   hosts: localhost
   connection: local
 
@@ -8,12 +8,11 @@
     admin_cluster_pair: "admin-cluster-pair"
     portworx_namespace: "portworx"
     dr_namespace: "boutique"
-    migration_interval: 5
-    schedule_policy_name: "boutique-schedule-policy"
+    migration_name: "boutique-migration"
 
   tasks:
-    - name: Create migration schedule
+    - name: Create migration
       ansible.builtin.include_role:
-        name: create-migration-schedule
+        name: create-migration
       vars:
         kubeconfig: "{{ primary_kubeconfig }}"
