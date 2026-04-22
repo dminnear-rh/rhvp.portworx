@@ -108,7 +108,7 @@
           --src-ep {{ _primary_ext_ep }}:9001
           --dest-ep {{ _secondary_ext_ep }}:9001
       register: _create_cp_result
-      no_log: true
+      # no_log: true
       failed_when: false
 
     - name: Verify cluster pair was created or already exists
