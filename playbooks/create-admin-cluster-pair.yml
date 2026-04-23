@@ -12,6 +12,7 @@
     s3_endpoint: "minio-api-minio.apps.drew-pwx-primary.aws.validatedpatterns.io"
     portworx_namespace: "portworx"
     cluster_pair_name: "admin-cluster-pair"
+    disable_ssl: true
 
   tasks:
     - name: Create admin cluster pair

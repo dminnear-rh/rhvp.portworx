@@ -13,6 +13,7 @@
     portworx_namespace: "portworx"
     cluster_pair_name: "boutique-cluster-pair"
     target_namespace: "boutique"
+    disable_ssl: true
 
   tasks:
     - name: Create admin cluster pair

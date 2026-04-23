@@ -7,3 +7,4 @@ target_namespace: "portworx" # the namespace to create the cluster pair in, shou
 stork_pod_label: "name=stork"
 stork_binary_path: "/storkctl/linux/storkctl"
 portworx_namespace: "portworx" # the namespace portworx is installed in on the primary and secondary clusters
+disable_ssl: true
